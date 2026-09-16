@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>rgx.cyberlab — Healthcare Security & Ethical Hacking Lab</title>
+<meta name="description" content="rgx.cyberlab — a healthcare data analyst learning offensive security and detection engineering. Healthcare threat surface (HL7, DICOM, PHI), engagement methodology, MITRE ATT&CK study matrix, OWASP Top 10 track, rules of engagement.">
+<meta name="author" content="Rahul">
+<link rel="canonical" href="https://rgxcyberlab.github.io/">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0A0D14">
+<meta property="og:type" content="website">
+<meta property="og:title" content="rgx.cyberlab — Healthcare Security & Ethical Hacking Lab">
+<meta property="og:description" content="Offensive security and detection engineering, pointed at hospital systems. Threat surface, methodology, ATT&CK matrix, OWASP track, rules of engagement.">
+<meta property="og:url" content="https://rgxcyberlab.github.io/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%230A0D14%22/><text y=%22.9em%22 x=%2216%22 font-size=%2272%22 fill=%22%23FF8A3D%22 font-family=%22monospace%22>_</text></svg>">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Rahul",
+  "alternateName": "rgx.cyberlab",
+  "url": "https://rgxcyberlab.github.io/",
+  "email": "rgx.cyberlab@gmail.com",
+  "jobTitle": "Senior Healthcare Data Analyst",
+  "address": { "@type": "PostalAddress", "addressLocality": "Gurugram", "addressCountry": "IN" },
+  "knowsAbout": ["Healthcare cybersecurity", "Penetration testing methodology", "MITRE ATT&CK", "OWASP Top 10", "Detection engineering", "HL7", "DICOM", "Python"]
+}
+</script>
+<style>
+  html { -webkit-text-size-adjust: 100%; }
+  :root { color-scheme: dark; }
+  body { margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --ground:      #0A0D14;
+    --surface:     #10141E;
+    --surface-2:   #161B28;
+    --line:        #222A3B;
+    --line-soft:   #1A2130;
+    --text:        #DCE3EF;
+    --text-dim:    #96A1B8;
+    --muted:       #6C778F;
+    --accent:      #FF8A3D;
+    --accent-deep: #B85E22;
+    --signal:      #4FD1C5;
+    --warn:        #F0C24B;
+    --crit:        #F2647A;
+
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+
+    --shell: 1120px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size: 68px 68px;
+    opacity: .5;
+    mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 18%, transparent 76%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, #000 18%, transparent 76%);
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+  /* ---------- status bar ---------- */
+  .statusbar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    background: rgba(10, 13, 20, .9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .statusbar-inner {
+    max-width: var(--shell);
+    margin: 0 auto;
+    padding: 9px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+  }
+  .sb-mark { color: var(--text); font-weight: 600; letter-spacing: .12em; }
+  .sb-mark span { color: var(--accent); }
+  .sb-spacer { flex: 1 1 auto; }
+  .sb-item { white-space: nowrap; }
+  .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--signal);
+    margin-right: 7px;
+    vertical-align: 1px;
+    box-shadow: 0 0 0 3px rgba(79, 209, 197, .14);
+  }
+  .pulse { animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+  /* ---------- shell ---------- */
+  .shell {
+    position: relative;
+    z-index: 1;
+    max-width: var(--shell);
+    margin: 0 auto;
+    padding-inline: 20px;
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative;
+    padding-block: 64px 52px;
+    display: grid;
+    gap: 26px;
+  }
+  #net {
+    position: absolute;
+    inset: -20px -20px auto -20px;
+    height: 320px;
+    width: calc(100% + 40px);
+    opacity: .5;
+    pointer-events: none;
+  }
+  .hero > * { position: relative; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+  }
+  .eyebrow::after {
+    content: "";
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent-deep), transparent);
+    opacity: .6;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(2.3rem, 8vw, 4.1rem);
+    line-height: 1.03;
+    letter-spacing: -.035em;
+    text-wrap: balance;
+  }
+  h1 .caret { color: var(--accent); font-weight: 400; animation: blink 1.15s steps(1) infinite; }
+  @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+  .lede {
+    max-width: 62ch;
+    font-size: clamp(1rem, 2.6vw, 1.12rem);
+    color: var(--text-dim);
+    margin: 0;
+  }
+  .lede strong { color: var(--text); font-weight: 600; }
+
+  /* ---------- terminal ---------- */
+  .term {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.85;
+    overflow: hidden;
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .term-bar i { font-style: normal; width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .term-bar i:first-child { background: var(--accent-deep); }
+  .term-body { padding: 16px 16px 18px; overflow-x: auto; }
+  .term-body pre { margin: 0; font: inherit; white-space: pre; }
+  .p { color: var(--signal); }
+  .c { color: var(--text); }
+  .k { color: var(--muted); }
+  .v { color: var(--text-dim); }
+  .hl { color: var(--accent); }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 12px 18px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    transition: border-color .18s, background .18s;
+  }
+  .btn:hover { text-decoration: none; border-color: var(--accent-deep); background: var(--surface-2); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #1A0E05; font-weight: 600; }
+  .btn-primary:hover { background: #FF9C58; border-color: #FF9C58; }
+  .btn .glyph { color: var(--accent); font-size: 14px; }
+  .btn-primary .glyph { color: #1A0E05; }
+
+  /* ---------- sections ---------- */
+  section { padding-block: 54px; border-top: 1px solid var(--line); }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .sec-head h2 {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .sec-head h2::before { content: "// "; color: var(--accent); }
+  .sec-note {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .sec-intro { margin: 0 0 28px; max-width: 64ch; color: var(--text-dim); font-size: .96rem; }
+
+  /* ---------- threat surface ---------- */
+  .threats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .threat {
+    background: var(--ground);
+    padding: 22px 20px;
+    display: grid;
+    gap: 9px;
+    align-content: start;
+    transition: background .2s;
+  }
+  .threat:hover { background: var(--surface); }
+  .threat-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .threat h3 { margin: 0; font-size: .98rem; font-weight: 600; letter-spacing: -.01em; }
+  .threat p { margin: 0; font-size: .89rem; color: var(--text-dim); }
+  .sev {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border: 1px solid currentColor;
+  }
+  .sev.hi  { color: var(--crit); }
+  .sev.med { color: var(--warn); }
+  .sev.lo  { color: var(--signal); }
+
+  /* ---------- methodology ---------- */
+  .phases { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .phase {
+    background: var(--ground);
+    display: grid;
+    grid-template-columns: 62px 1fr;
+    gap: 0 20px;
+    padding: 20px;
+    align-items: start;
+    transition: background .2s;
+  }
+  .phase:hover { background: var(--surface); }
+  .phase-n {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .1em;
+    color: var(--accent);
+    padding-top: 3px;
+    font-variant-numeric: tabular-nums;
+  }
+  .phase-body { display: grid; gap: 7px; }
+  .phase h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+  .phase p { margin: 0; font-size: .9rem; color: var(--text-dim); max-width: 68ch; }
+  .phase .tools {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: .02em;
+  }
+
+  /* ---------- attack matrix ---------- */
+  .matrix {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(146px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .tac {
+    background: var(--ground);
+    padding: 13px 12px;
+    display: grid;
+    gap: 5px;
+    align-content: start;
+    min-height: 82px;
+    position: relative;
+    transition: background .2s;
+  }
+  .tac:hover { background: var(--surface-2); }
+  .tac-id {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .tac-name { font-size: .84rem; font-weight: 500; line-height: 1.3; }
+  .tac-state {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .tac[data-s="active"]  { box-shadow: inset 2px 0 0 var(--signal); }
+  .tac[data-s="active"]  .tac-state { color: var(--signal); }
+  .tac[data-s="reading"] { box-shadow: inset 2px 0 0 var(--warn); }
+  .tac[data-s="reading"] .tac-state { color: var(--warn); }
+  .tac[data-s="queued"]  .tac-state { color: var(--muted); }
+  .tac[data-s="queued"]  .tac-name  { color: var(--text-dim); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend b { width: 9px; height: 9px; display: inline-block; }
+  .legend .l-a { background: var(--signal); }
+  .legend .l-r { background: var(--warn); }
+  .legend .l-q { background: var(--line); }
+
+  /* ---------- owasp table ---------- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+  table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: .9rem; }
+  thead th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+    white-space: nowrap;
+  }
+  tbody td { padding: 12px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--surface); }
+  td.id { font-family: var(--mono); color: var(--accent); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.nm { font-weight: 500; }
+  td.nt { color: var(--text-dim); font-size: .86rem; }
+  td.st { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+  .st-a { color: var(--signal); }
+  .st-r { color: var(--warn); }
+  .st-q { color: var(--muted); }
+
+  /* ---------- stack by phase ---------- */
+  .stack-group { display: grid; gap: 12px; margin-bottom: 24px; }
+  .stack-group:last-child { margin-bottom: 0; }
+  .stack-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+  }
+  .stack-label i { font-style: normal; width: 8px; height: 8px; border: 1px solid currentColor; }
+  .stack-label.is-live i  { background: var(--signal); border-color: var(--signal); }
+  .stack-label.is-learn i { border-color: var(--warn); }
+  .stack-label.is-next i  { border-color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 6px 11px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text-dim);
+  }
+  .chip.live { border-color: rgba(79, 209, 197, .32); color: var(--text); }
+
+  /* ---------- lab ---------- */
+  .lab { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+  .card {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 22px;
+    display: grid;
+    gap: 12px;
+    align-content: start;
+    position: relative;
+  }
+  .card::after {
+    content: "";
+    position: absolute;
+    top: -1px; right: -1px;
+    width: 12px; height: 12px;
+    border-top: 1px solid var(--accent-deep);
+    border-right: 1px solid var(--accent-deep);
+  }
+  .card h3 { margin: 0; font-size: 1.02rem; font-weight: 600; letter-spacing: -.01em; }
+  .card p { margin: 0; font-size: .89rem; color: var(--text-dim); }
+  .card .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+  .card .tags span {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .06em;
+    color: var(--muted);
+    border: 1px solid var(--line-soft);
+    padding: 3px 7px;
+  }
+  .status {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid currentColor;
+    justify-self: start;
+  }
+  .status.shipped { color: var(--signal); }
+  .status.active  { color: var(--warn); }
+  .status.planned { color: var(--muted); }
+
+  /* ---------- ethics ---------- */
+  .ethics {
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--accent);
+    background: var(--surface);
+    padding: 26px 24px;
+    display: grid;
+    gap: 16px;
+  }
+  .ethics ol { margin: 0; padding-left: 20px; display: grid; gap: 10px; }
+  .ethics li { color: var(--text-dim); font-size: .94rem; max-width: 70ch; }
+  .ethics li strong { color: var(--text); font-weight: 600; }
+  .ethics::marker { color: var(--accent); }
+
+  /* ---------- roadmap ---------- */
+  .creds { display: grid; border: 1px solid var(--line); }
+  .cred {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 18px;
+    padding: 17px 20px;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+  }
+  .cred:last-child { border-bottom: 0; }
+  .cred-main { display: grid; gap: 3px; }
+  .cred-name { font-weight: 600; font-size: .97rem; }
+  .cred-org { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+  .cred-when {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .cred-when.done { color: var(--signal); }
+  .cred-when.wip  { color: var(--warn); }
+
+  /* ---------- contact ---------- */
+  .contact-box {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 30px 26px;
+    display: grid;
+    gap: 18px;
+  }
+  .contact-box h3 {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: clamp(1.1rem, 4vw, 1.5rem);
+    font-weight: 500;
+    letter-spacing: -.02em;
+    word-break: break-word;
+  }
+  .contact-box h3 a { color: var(--accent); }
+  .contact-box p { margin: 0; color: var(--text-dim); max-width: 58ch; font-size: .94rem; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px 22px; }
+  .links a {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .links a:hover { color: var(--accent); }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding-block: 26px 42px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    justify-content: space-between;
+  }
+
+  /* =====================================================
+     MOTION LAYER
+     All motion is opt-in via JS-added classes, so the page
+     is fully readable with JS off, and reduced-motion users
+     get the resting state.
+     ===================================================== */
+
+  /* status bar: sweeping scanner line */
+  .statusbar::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: -1px;
+    height: 1px;
+    width: 18%;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: sweep 4.6s linear infinite;
+    opacity: .8;
+  }
+  .statusbar { position: sticky; overflow: hidden; }
+  @keyframes sweep {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(560%); }
+  }
+
+  /* hero entrance: fast staggered rise */
+  .js .hero > .eyebrow,
+  .js .hero > h1,
+  .js .hero > .lede,
+  .js .hero > .term,
+  .js .hero > .actions {
+    animation: rise .7s cubic-bezier(.2,.7,.2,1) both;
+  }
+  .js .hero > h1     { animation-delay: .08s; }
+  .js .hero > .lede  { animation-delay: .16s; }
+  .js .hero > .term  { animation-delay: .24s; }
+  .js .hero > .actions { animation-delay: .34s; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* terminal boot: lines appear in order, command types */
+  .term-body { position: relative; }
+  .js .term.booting .ln { opacity: 0; }
+  .js .term.booting .ln.on { opacity: 1; animation: lineIn .22s ease-out both; }
+  @keyframes lineIn {
+    from { opacity: 0; transform: translateX(-4px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .tcaret { animation: blink 1.1s steps(1) infinite; }
+  .scanline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 42px;
+    top: -42px;
+    background: linear-gradient(180deg, transparent, rgba(79, 209, 197, .06), transparent);
+    pointer-events: none;
+    animation: scan 7s linear infinite;
+    animation-delay: 2.2s;
+  }
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(420px); }
+  }
+
+  /* headline decode: hex noise resolves to the real text */
+  h1 .decode { display: inline-block; min-width: 1ch; }
+  h1 .decode.noise { color: var(--muted); }
+
+  /* section reveal on scroll */
+  .js .reveal { opacity: 0; transform: translateY(18px); }
+  .js .reveal.in {
+    opacity: 1;
+    transform: none;
+    transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);
+  }
+
+  /* grid children stagger when their section reveals */
+  .js .reveal .threat,
+  .js .reveal .phase,
+  .js .reveal .tac,
+  .js .reveal .card,
+  .js .reveal .cred,
+  .js .reveal tbody tr,
+  .js .reveal .chip {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .js .reveal.in .threat,
+  .js .reveal.in .phase,
+  .js .reveal.in .tac,
+  .js .reveal.in .card,
+  .js .reveal.in .cred,
+  .js .reveal.in tbody tr,
+  .js .reveal.in .chip {
+    opacity: 1;
+    transform: none;
+    transition: opacity .55s ease-out, transform .55s cubic-bezier(.2,.7,.2,1);
+    transition-delay: calc(var(--i, 0) * 45ms);
+  }
+
+  /* hover micro-interactions */
+  .threat, .phase, .tac, .card, .chip, .cred {
+    transition: background .25s, border-color .25s, transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s;
+  }
+  .threat:hover, .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px -22px rgba(0,0,0,.9), 0 0 0 1px var(--accent-deep);
+    z-index: 1;
+  }
+  .card:hover::after { width: 22px; height: 22px; transition: width .25s, height .25s; }
+  .card::after { transition: width .25s, height .25s; }
+  .chip:hover { border-color: var(--accent-deep); color: var(--text); transform: translateY(-1px); }
+  .tac:hover { transform: scale(1.03); z-index: 1; box-shadow: 0 12px 30px -16px rgba(0,0,0,.9), inset 2px 0 0 var(--accent); }
+  .tac[data-s="active"]:hover  { box-shadow: 0 12px 30px -16px rgba(0,0,0,.9), inset 2px 0 0 var(--signal); }
+  .sev.hi { animation: sevpulse 2.8s ease-in-out infinite; }
+  @keyframes sevpulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(242,100,122,0); }
+    50%      { box-shadow: 0 0 0 3px rgba(242,100,122,.18); }
+  }
+  .phase:hover .phase-n { color: var(--signal); transition: color .2s; }
+  .btn { position: relative; overflow: hidden; }
+  .btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+    transform: translateX(-120%);
+    transition: transform .55s ease;
+  }
+  .btn:hover::before { transform: translateX(120%); }
+  .btn .glyph { transition: transform .25s; }
+  .btn:hover .glyph { transform: translateX(2px); }
+
+  /* section headers: the // slides in */
+  .sec-head h2::before { display: inline-block; transition: transform .3s; }
+  section:hover .sec-head h2::before { transform: translateX(-3px); }
+
+  /* smooth anchor scroll */
+  html { scroll-behavior: smooth; }
+
+  @media (max-width: 560px) {
+    .hero { padding-block: 40px 36px; }
+    section { padding-block: 40px; }
+    .cred { grid-template-columns: 1fr; }
+    .cred-when { justify-self: start; }
+    .phase { grid-template-columns: 1fr; gap: 8px; }
+    .term-body { font-size: 12px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+</style>
+
+<div class="statusbar">
+  <div class="statusbar-inner">
+    <span class="sb-mark">rgx<span>.</span>cyberlab</span>
+    <span class="sb-spacer"></span>
+    <span class="sb-item"><span class="dot pulse"></span>authorized targets only</span>
+    <span class="sb-item">gurugram, in · utc+5:30</span>
+  </div>
+</div>
+
+<div class="shell">
+
+  <header class="hero">
+    <canvas id="net" aria-hidden="true"></canvas>
+
+    <p class="eyebrow">Offensive Security · Healthcare Systems · Detection</p>
+
+    <h1>rgx.cyberlab<span class="caret">_</span></h1>
+
+    <p class="lede">
+      I am a healthcare data analyst learning to attack and defend the systems I already
+      work inside &mdash; hospital information systems, clinical interfaces, patient data
+      pipelines. <strong>Most people entering security have never seen a hospital network
+      from the inside. I have.</strong> This is the working log of getting good at the rest.
+    </p>
+
+    <div class="term">
+      <div class="term-bar"><i></i><i></i><i></i><span>rgx@cyberlab &mdash; zsh</span></div>
+      <div class="term-body" id="term">
+<pre><span class="ln"><span class="p">rgx@cyberlab</span>:<span class="hl">~</span>$ <span class="c" id="cmd" data-cmd="whoami --verbose">whoami --verbose</span></span>
+<span class="ln"><span class="k">handle      </span> <span class="v">rgx.cyberlab</span></span>
+<span class="ln"><span class="k">day job     </span> <span class="v">Senior Healthcare Data Analyst · Gurugram, IN</span></span>
+<span class="ln"><span class="k">domain      </span> <span class="v">HIS data, clinical registers, billing pipelines</span></span>
+<span class="ln"><span class="k">pivoting to </span> <span class="hl">offensive security &amp; detection engineering</span></span>
+<span class="ln"><span class="k">niche       </span> <span class="v">healthcare attack surface — HL7, DICOM, PHI flows</span></span>
+<span class="ln"><span class="k">languages   </span> <span class="v">python, sql, bash</span></span>
+<span class="ln"><span class="k">scope       </span> <span class="v">lab environments and written authorization only</span></span>
+<span class="ln"><span class="k">status      </span> <span class="v">learning in public · writeups published here</span></span>
+<span class="ln"> </span>
+<span class="ln"><span class="p">rgx@cyberlab</span>:<span class="hl">~</span>$ <span class="c tcaret">_</span></span></pre>
+        <div class="scanline" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-primary" href="mailto:rgx.cyberlab@gmail.com"><span class="glyph">&#9993;</span> Contact</a>
+      <a class="btn" href="#surface"><span class="glyph">&#9888;</span> Threat surface</a>
+      <a class="btn" href="#method"><span class="glyph">&#9635;</span> Methodology</a>
+      <a class="btn" href="#rules"><span class="glyph">&#9878;</span> Rules of engagement</a>
+    </div>
+  </header>
+
+  <!-- ============ THREAT SURFACE ============ -->
+  <section id="surface">
+    <div class="sec-head">
+      <h2>Healthcare threat surface</h2>
+      <span class="sec-note">the part I know from the inside</span>
+    </div>
+    <p class="sec-intro">
+      Hospital networks are a genuinely hard target class: life-critical uptime, decades of
+      legacy protocol, medical devices nobody is allowed to patch mid-shift, and data that
+      cannot simply be rotated after a breach. These are the surfaces I study.
+    </p>
+
+    <div class="threats">
+      <article class="threat">
+        <div class="threat-top"><h3>HL7 v2 interfaces</h3><span class="sev hi">Critical</span></div>
+        <p>Clinical messaging still commonly rides MLLP over plaintext TCP with no authentication between integrated systems. Anything on the interface segment can read or forge orders and results.</p>
+      </article>
+      <article class="threat">
+        <div class="threat-top"><h3>DICOM / PACS exposure</h3><span class="sev hi">Critical</span></div>
+        <p>Imaging archives have a long public history of sitting internet-reachable with anonymous access enabled. Studies carry full patient identifiers inside the file header, not just the pixels.</p>
+      </article>
+      <article class="threat">
+        <div class="threat-top"><h3>Unpatchable medical devices</h3><span class="sev hi">High</span></div>
+        <p>Embedded and regulated devices run frozen OS images for their certified lifetime. Segmentation and monitoring are the only real controls, which makes network visibility the whole game.</p>
+      </article>
+      <article class="threat">
+        <div class="threat-top"><h3>Shared clinical workstations</h3><span class="sev med">High</span></div>
+        <p>Speed of care pushes wards toward shared logins and long sessions. Attribution collapses, and credential reuse becomes the shortest path from a ward PC to the record system.</p>
+      </article>
+      <article class="threat">
+        <div class="threat-top"><h3>Reporting &amp; export paths</h3><span class="sev med">Medium</span></div>
+        <p>My own daily territory. Analytics extracts leave the clinical system and land in spreadsheets, mail and shared drives, where PHI quietly outlives every control that governed the source.</p>
+      </article>
+      <article class="threat">
+        <div class="threat-top"><h3>Ransomware blast radius</h3><span class="sev hi">Critical</span></div>
+        <p>In hospitals the impact metric is not downtime cost, it is diverted ambulances and delayed procedures. Recovery planning has to be measured against clinical continuity, not RTO alone.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ METHODOLOGY ============ -->
+  <section id="method">
+    <div class="sec-head">
+      <h2>Engagement methodology</h2>
+      <span class="sec-note">the sequence I work to</span>
+    </div>
+    <p class="sec-intro">
+      A real assessment is a process, not a tool run. These phases are ordered because each
+      one depends on the last, and because the last phase is the only one the client actually
+      pays for.
+    </p>
+
+    <div class="phases">
+      <div class="phase">
+        <span class="phase-n">01</span>
+        <div class="phase-body">
+          <h3>Scope &amp; authorization</h3>
+          <p>Written permission, defined in-scope ranges, testing windows, escalation contacts and explicit exclusions. In a clinical environment this also means agreeing which systems are never touched during patient hours.</p>
+          <p class="tools">artifacts: rules of engagement, scope document, emergency contact chain</p>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="phase-n">02</span>
+        <div class="phase-body">
+          <h3>Reconnaissance</h3>
+          <p>Building a picture of the target's exposed footprint before touching anything: domains, subdomains, public records, exposed services, vendor relationships and the technology stack that follows from them.</p>
+          <p class="tools">tooling: dns enumeration, certificate transparency, osint sources, search operators</p>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="phase-n">03</span>
+        <div class="phase-body">
+          <h3>Enumeration &amp; vulnerability identification</h3>
+          <p>Mapping live hosts, open ports, service versions and application surfaces, then correlating those against known weaknesses and misconfigurations. Verifying findings by hand, because scanner output is a hypothesis rather than a finding.</p>
+          <p class="tools">tooling: nmap, nikto, burp suite, nessus-class scanners, manual verification</p>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="phase-n">04</span>
+        <div class="phase-body">
+          <h3>Controlled exploitation</h3>
+          <p>Proving impact within the agreed scope: confirming a weakness is genuinely reachable and what it actually exposes. Least-damaging proof wins, and anything destructive stays out unless the scope explicitly buys it.</p>
+          <p class="tools">discipline: minimum necessary access, no data exfiltration, full activity logging</p>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="phase-n">05</span>
+        <div class="phase-body">
+          <h3>Detection review</h3>
+          <p>The half most portfolios skip. Going back through the defender's telemetry to ask which of my actions generated a signal, which passed silently, and what rule would have caught the difference.</p>
+          <p class="tools">focus: log coverage gaps, alert tuning, MITRE ATT&amp;CK mapping</p>
+        </div>
+      </div>
+      <div class="phase">
+        <span class="phase-n">06</span>
+        <div class="phase-body">
+          <h3>Reporting &amp; remediation</h3>
+          <p>Findings written for two audiences at once: an executive summary that survives a board meeting, and technical detail an engineer can reproduce and fix. Risk rated against clinical impact, not just CVSS.</p>
+          <p class="tools">deliverables: findings report, prioritized remediation plan, retest</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ATT&CK MATRIX ============ -->
+  <section id="attack">
+    <div class="sec-head">
+      <h2>ATT&amp;CK study matrix</h2>
+      <span class="sec-note">MITRE ATT&amp;CK enterprise tactics</span>
+    </div>
+    <p class="sec-intro">
+      Tracking my own coverage across the fourteen enterprise tactics rather than counting
+      finished rooms. Honest state per tactic &mdash; a filled marker means I can both execute
+      the technique in a lab and describe what it leaves behind in the logs.
+    </p>
+
+    <div class="matrix" id="matrix"></div>
+
+    <div class="legend">
+      <span><b class="l-a"></b>Hands-on in lab</span>
+      <span><b class="l-r"></b>Currently reading</span>
+      <span><b class="l-q"></b>Queued</span>
+    </div>
+  </section>
+
+  <!-- ============ OWASP ============ -->
+  <section id="owasp">
+    <div class="sec-head">
+      <h2>OWASP Top 10 &mdash; 2021</h2>
+      <span class="sec-note">web application track</span>
+    </div>
+    <p class="sec-intro">
+      Working the web application side category by category, with a note on where each one
+      actually shows up in healthcare software.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Category</th><th>Where it bites in health IT</th><th>State</th></tr>
+        </thead>
+        <tbody id="owasp-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ STACK ============ -->
+  <section id="stack">
+    <div class="sec-head">
+      <h2>Toolchain</h2>
+      <span class="sec-note">honest about what is which</span>
+    </div>
+
+    <div class="stack-group">
+      <p class="stack-label is-live"><i></i>Working with daily</p>
+      <div class="chips">
+        <span class="chip live">Python</span>
+        <span class="chip live">pandas</span>
+        <span class="chip live">SQL</span>
+        <span class="chip live">Bash</span>
+        <span class="chip live">Git</span>
+        <span class="chip live">Regex</span>
+        <span class="chip live">HIS data extracts</span>
+      </div>
+    </div>
+
+    <div class="stack-group">
+      <p class="stack-label is-learn"><i></i>Learning now</p>
+      <div class="chips">
+        <span class="chip">Linux internals</span>
+        <span class="chip">Nmap</span>
+        <span class="chip">Wireshark</span>
+        <span class="chip">Burp Suite</span>
+        <span class="chip">Metasploit</span>
+        <span class="chip">Hashcat</span>
+        <span class="chip">OWASP ZAP</span>
+      </div>
+    </div>
+
+    <div class="stack-group">
+      <p class="stack-label is-next"><i></i>Next up</p>
+      <div class="chips">
+        <span class="chip">Splunk / SIEM query</span>
+        <span class="chip">Sysmon</span>
+        <span class="chip">Sigma rules</span>
+        <span class="chip">Volatility</span>
+        <span class="chip">Active Directory attack paths</span>
+        <span class="chip">Ghidra</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LAB ============ -->
+  <section id="lab">
+    <div class="sec-head">
+      <h2>The lab</h2>
+      <span class="sec-note">what is actually running</span>
+    </div>
+    <div class="lab">
+      <article class="card">
+        <span class="status planned">Building</span>
+        <h3>Segmented home range</h3>
+        <p>Isolated VM network with an attacker box, deliberately vulnerable targets and a separate logging host, so every technique can be practised from both the offensive and the detection side of the same event.</p>
+        <div class="tags"><span>VirtualBox</span><span>pfSense</span><span>Kali</span><span>Sysmon</span></div>
+      </article>
+
+      <article class="card">
+        <span class="status planned">Designing</span>
+        <h3>Synthetic HL7 test bench</h3>
+        <p>A mock clinical interface generating synthetic HL7 traffic between fake systems, with fully invented patient records. Lets the healthcare protocol surface be studied without a single real identifier in scope.</p>
+        <div class="tags"><span>Python</span><span>MLLP</span><span>Synthetic data</span></div>
+      </article>
+
+      <article class="card">
+        <span class="status active">Starting</span>
+        <h3>Writeups, not badge counts</h3>
+        <p>Each box I finish gets a written breakdown: the enumeration that mattered, the foothold, and crucially what the defender would have seen in their telemetry. Published here as they are completed.</p>
+        <div class="tags"><span>Recon</span><span>Web</span><span>PrivEsc</span><span>Detection</span></div>
+      </article>
+
+      <article class="card">
+        <span class="status shipped">Shipped</span>
+        <h3>Hospital reporting pipeline</h3>
+        <p>Production automation that turns raw hospital system exports into a reconciled monthly reporting workbook. Where I learned how clinical data actually moves, which is the same knowledge that makes its exposure obvious.</p>
+        <div class="tags"><span>Python</span><span>pandas</span><span>openpyxl</span></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ RULES OF ENGAGEMENT ============ -->
+  <section id="rules">
+    <div class="sec-head">
+      <h2>Rules of engagement</h2>
+      <span class="sec-note">non-negotiable</span>
+    </div>
+    <div class="ethics">
+      <ol>
+        <li><strong>Written authorization or lab only.</strong> Nothing gets tested without documented permission from someone empowered to give it, or inside a range I own outright. Curiosity is not authorization.</li>
+        <li><strong>Never real patient data.</strong> Every dataset in this lab is synthetic or fully de-identified. Healthcare has one breach that cannot be undone, and a training exercise is not worth it.</li>
+        <li><strong>Minimum necessary access.</strong> Prove the finding, then stop. No lateral movement past scope, no data pulled out, no destructive proof where a screenshot settles it.</li>
+        <li><strong>Responsible disclosure.</strong> Anything found outside a formal engagement goes to the owner privately, with a reasonable window to fix it, before it is written about anywhere.</li>
+        <li><strong>Clinical safety outranks the test.</strong> In a live hospital environment, any sign that testing could touch patient care stops the engagement immediately. Nothing found is worth a delayed procedure.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ CREDENTIALS ============ -->
+  <section id="credentials">
+    <div class="sec-head">
+      <h2>Credentials &amp; roadmap</h2>
+      <span class="sec-note">held and targeted</span>
+    </div>
+    <div class="creds">
+      <div class="cred">
+        <div class="cred-main">
+          <span class="cred-name">ECBA &mdash; Entry Certificate in Business Analysis</span>
+          <span class="cred-org">IIBA</span>
+        </div>
+        <span class="cred-when done">Certified</span>
+      </div>
+      <div class="cred">
+        <div class="cred-main">
+          <span class="cred-name">Machine Learning &amp; Data Science programme</span>
+          <span class="cred-org">IIT Delhi &mdash; applied to anomaly detection</span>
+        </div>
+        <span class="cred-when wip">In progress</span>
+      </div>
+      <div class="cred">
+        <div class="cred-main">
+          <span class="cred-name">MBA, Healthcare Management</span>
+          <span class="cred-org">Symbiosis (SSODL)</span>
+        </div>
+        <span class="cred-when wip">2025 &ndash; 27</span>
+      </div>
+      <div class="cred">
+        <div class="cred-main">
+          <span class="cred-name">CompTIA Security+</span>
+          <span class="cred-org">Foundations &mdash; next target</span>
+        </div>
+        <span class="cred-when">Planned</span>
+      </div>
+      <div class="cred">
+        <div class="cred-main">
+          <span class="cred-name">eJPT &mdash; Junior Penetration Tester</span>
+          <span class="cred-org">INE Security &mdash; first hands-on offensive cert</span>
+        </div>
+        <span class="cred-when">Planned</span>
+      </div>
+      <div class="cred">
+        <div class="cred-main">
+          <span class="cred-name">OSCP</span>
+          <span class="cred-org">OffSec &mdash; long-range goal</span>
+        </div>
+        <span class="cred-when">Roadmap</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section id="contact">
+    <div class="sec-head">
+      <h2>Contact</h2>
+      <span class="sec-note">disclosure &amp; conversation</span>
+    </div>
+    <div class="contact-box">
+      <h3><a href="mailto:rgx.cyberlab@gmail.com">rgx.cyberlab@gmail.com</a></h3>
+      <p>
+        Open to conversations about healthcare security, detection engineering, and the gap
+        between what clinical systems are supposed to do and what they actually do. If you
+        are reporting something you found, mark the subject line <strong>DISCLOSURE</strong>
+        and I will reply from IST hours.
+      </p>
+      <div class="links">
+        <a href="https://github.com/rgxcyberlab" rel="me">GitHub &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>rgx.cyberlab &mdash; authorized targets only</span>
+    <span id="builtline">Maintained by hand</span>
+  </footer>
+
+</div>
+
+<script>
+/* ---- motion bootstrap ----
+   Runs first. Marks the document as JS-capable so the motion
+   layer activates; reduced-motion users keep the resting state. */
+var RGX_REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+if (!RGX_REDUCE) document.documentElement.classList.add('js');
+
+/* ---- ATT&CK tactic matrix ---- */
+(function () {
+  var TACTICS = [
+    ['TA0043', 'Reconnaissance',       'reading'],
+    ['TA0042', 'Resource Development', 'queued'],
+    ['TA0001', 'Initial Access',       'reading'],
+    ['TA0002', 'Execution',            'reading'],
+    ['TA0003', 'Persistence',          'queued'],
+    ['TA0004', 'Privilege Escalation', 'reading'],
+    ['TA0005', 'Defense Evasion',      'queued'],
+    ['TA0006', 'Credential Access',    'queued'],
+    ['TA0007', 'Discovery',            'reading'],
+    ['TA0008', 'Lateral Movement',     'queued'],
+    ['TA0009', 'Collection',           'queued'],
+    ['TA0011', 'Command & Control',    'queued'],
+    ['TA0010', 'Exfiltration',         'queued'],
+    ['TA0040', 'Impact',               'queued']
+  ];
+  var LABEL = { active: 'Hands-on', reading: 'Reading', queued: 'Queued' };
+  var host = document.getElementById('matrix');
+  if (!host) return;
+  var html = '';
+  for (var i = 0; i < TACTICS.length; i++) {
+    var t = TACTICS[i];
+    html += '<div class="tac" data-s="' + t[2] + '">' +
+              '<span class="tac-id">' + t[0] + '</span>' +
+              '<span class="tac-name">' + t[1].replace(/&/g, '&amp;') + '</span>' +
+              '<span class="tac-state">' + LABEL[t[2]] + '</span>' +
+            '</div>';
+  }
+  host.innerHTML = html;
+})();
+
+/* ---- OWASP Top 10 table ---- */
+(function () {
+  var ROWS = [
+    ['A01', 'Broken Access Control', 'A clinician role that can pull any record, not just their own ward’s patients.', 'reading'],
+    ['A02', 'Cryptographic Failures', 'Clinical interfaces and exports moving identifiers in plaintext between systems.', 'reading'],
+    ['A03', 'Injection', 'Report and query builders that pass user input straight into the database layer.', 'reading'],
+    ['A04', 'Insecure Design', 'Workflows built for ward speed, where the shared login is the intended design.', 'queued'],
+    ['A05', 'Security Misconfiguration', 'Default credentials surviving on imaging and departmental servers for years.', 'reading'],
+    ['A06', 'Vulnerable &amp; Outdated Components', 'Vendor-locked clinical software pinned to an unsupported runtime.', 'queued'],
+    ['A07', 'Identification &amp; Auth Failures', 'No MFA on remote access to systems holding the full patient index.', 'queued'],
+    ['A08', 'Software &amp; Data Integrity Failures', 'Unverified vendor update channels reaching into the clinical network.', 'queued'],
+    ['A09', 'Logging &amp; Monitoring Failures', 'Record access logged but never reviewed, so internal snooping runs for months.', 'reading'],
+    ['A10', 'Server-Side Request Forgery', 'Integration endpoints that fetch a URL the caller supplies.', 'queued']
+  ];
+  var CLS = { active: 'st-a', reading: 'st-r', queued: 'st-q' };
+  var LABEL = { active: 'Hands-on', reading: 'Reading', queued: 'Queued' };
+  var body = document.getElementById('owasp-body');
+  if (!body) return;
+  var html = '';
+  for (var i = 0; i < ROWS.length; i++) {
+    var r = ROWS[i];
+    html += '<tr>' +
+              '<td class="id">' + r[0] + '</td>' +
+              '<td class="nm">' + r[1] + '</td>' +
+              '<td class="nt">' + r[2] + '</td>' +
+              '<td class="st ' + CLS[r[3]] + '">' + LABEL[r[3]] + '</td>' +
+            '</tr>';
+  }
+  body.innerHTML = html;
+})();
+
+/* ---- ambient network canvas ---- */
+(function () {
+  var canvas = document.getElementById('net');
+  if (!canvas || !canvas.getContext) return;
+  var ctx = canvas.getContext('2d');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var nodes = [], w = 0, h = 0, dpr = 1, raf = null;
+  var LINK = 130;
+
+  function seed() {
+    var count = Math.max(18, Math.min(44, Math.round(w / 27)));
+    nodes = [];
+    for (var i = 0; i < count; i++) {
+      nodes.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: (Math.random() - 0.5) * 0.15,
+        r: Math.random() < 0.16 ? 2.1 : 1.2
+      });
+    }
+  }
+  function resize() {
+    var rect = canvas.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = Math.max(1, rect.width);
+    h = Math.max(1, rect.height);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    seed();
+    if (reduce) draw();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    for (var i = 0; i < nodes.length; i++) {
+      for (var j = i + 1; j < nodes.length; j++) {
+        var dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        var d = Math.sqrt(dx * dx + dy * dy);
+        if (d < LINK) {
+          ctx.strokeStyle = 'rgba(79, 209, 197, ' + (0.19 * (1 - d / LINK)).toFixed(3) + ')';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    for (var k = 0; k < nodes.length; k++) {
+      var n = nodes[k];
+      ctx.fillStyle = n.r > 1.6 ? 'rgba(255, 138, 61, 0.72)' : 'rgba(150, 161, 184, 0.46)';
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  function step() {
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > w) n.vx *= -1;
+      if (n.y < 0 || n.y > h) n.vy *= -1;
+    }
+    draw();
+    raf = requestAnimationFrame(step);
+  }
+  resize();
+  window.addEventListener('resize', function () {
+    if (raf) cancelAnimationFrame(raf);
+    resize();
+    if (!reduce) raf = requestAnimationFrame(step);
+  });
+  if (!reduce) raf = requestAnimationFrame(step);
+})();
+
+/* ---- headline decode: hex noise resolves into the handle ---- */
+(function () {
+  if (RGX_REDUCE) return;
+  var h1 = document.querySelector('h1');
+  if (!h1) return;
+  var caret = h1.querySelector('.caret');
+  var final = (h1.textContent || '').replace('_', '');
+  var GLYPHS = '0123456789abcdef<>/\\|#$%&';
+  var spans = [];
+  var frag = document.createDocumentFragment();
+  for (var i = 0; i < final.length; i++) {
+    var s = document.createElement('span');
+    s.className = 'decode';
+    s.textContent = final[i];
+    spans.push(s);
+    frag.appendChild(s);
+  }
+  h1.textContent = '';
+  h1.appendChild(frag);
+  if (caret) h1.appendChild(caret);
+
+  var start = null, DUR = 1100;
+  function frame(ts) {
+    if (!start) start = ts;
+    var t = (ts - start) / DUR;
+    for (var i = 0; i < spans.length; i++) {
+      var ch = final[i];
+      var settleAt = (i / spans.length) * 0.75 + 0.2;   /* left-to-right settle */
+      if (ch === ' ' || ch === '.' || t >= settleAt) {
+        spans[i].textContent = ch;
+        spans[i].classList.remove('noise');
+      } else {
+        spans[i].textContent = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+        spans[i].classList.add('noise');
+      }
+    }
+    if (t < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ---- terminal boot: type the command, then print output line by line ---- */
+(function () {
+  if (RGX_REDUCE) return;
+  var term = document.querySelector('.term');
+  var cmd = document.getElementById('cmd');
+  if (!term || !cmd) return;
+  var lines = term.querySelectorAll('.ln');
+  var full = cmd.getAttribute('data-cmd') || cmd.textContent;
+
+  term.classList.add('booting');
+  lines[0].classList.add('on');
+  cmd.textContent = '';
+
+  var i = 0;
+  function type() {
+    if (i <= full.length) {
+      cmd.textContent = full.slice(0, i++);
+      setTimeout(type, 38 + Math.random() * 40);
+    } else {
+      setTimeout(print, 220);
+    }
+  }
+  var k = 1;
+  function print() {
+    if (k < lines.length) {
+      lines[k++].classList.add('on');
+      setTimeout(print, 70);
+    } else {
+      term.classList.remove('booting');
+    }
+  }
+  setTimeout(type, 420);
+})();
+
+/* ---- scroll reveal with stagger + safety net ---- */
+(function () {
+  if (RGX_REDUCE) return;
+  var sections = document.querySelectorAll('section');
+  var STAGGER = '.threat, .phase, .tac, .card, .cred, tbody tr, .chip';
+  for (var s = 0; s < sections.length; s++) {
+    sections[s].classList.add('reveal');
+    var kids = sections[s].querySelectorAll(STAGGER);
+    for (var i = 0; i < kids.length; i++) kids[i].style.setProperty('--i', Math.min(i, 24));
+  }
+  function show(el) { el.classList.add('in'); }
+
+  if (!('IntersectionObserver' in window)) {
+    for (var a = 0; a < sections.length; a++) show(sections[a]);
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    for (var e = 0; e < entries.length; e++) {
+      if (entries[e].isIntersecting) { show(entries[e].target); io.unobserve(entries[e].target); }
+    }
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+  for (var o = 0; o < sections.length; o++) io.observe(sections[o]);
+
+  /* Nothing stays hidden if the observer never fires (thumbnail capture, odd embeds). */
+  setTimeout(function () { for (var z = 0; z < sections.length; z++) show(sections[z]); }, 2600);
+})();
+
+/* ---- footer timestamp ---- */
+(function () {
+  var el = document.getElementById('builtline');
+  if (el) el.textContent = 'Last updated ' + new Date().toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+})();
+</script>
+</body>
+</html>
